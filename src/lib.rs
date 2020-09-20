@@ -1,26 +1,37 @@
+#[macro_use] extern crate log;
 use std::char::from_u32;
+use log::Level;
+
+const RIGHT: &'static str = "right";
+const LEFT: &'static str = "left";
+const ASCII_BITS_PER_CHAR: usize = 8;
 
 fn shift_binary_string(bin_str: String, i: i32, direction: &str) -> String {
+
     let i1 = i as usize;
 
-    return if direction.to_lowercase().as_str() == "right" {
+    return if direction.to_lowercase().as_str() == RIGHT {
         let x: String = bin_str.chars().take(bin_str.len() - i1).collect();
         format!("{}{}", "0".repeat(i1), x)
-    } else {
+    } else if direction.to_lowercase().as_str() == LEFT {
         format!("{}{}", bin_str, "0".repeat(i1))
+    }
+    else {
+        println!("bad direction: {}", direction);
+          bin_str
     };
 }
 
 fn binary_string_to_ascii(mut s: String) -> String {
-    if s.len() % 8 != 0 {
-        let padded_zeros_cnt = 8 - s.len() % 8;
+    if s.len() % ASCII_BITS_PER_CHAR != 0 {
+        let padded_zeros_cnt = ASCII_BITS_PER_CHAR - s.len() % ASCII_BITS_PER_CHAR;
         s = format!("{}{}", "0".repeat(padded_zeros_cnt).to_string(), s);
     }
 
     let chars: Vec<char> = (0..s.len())
-        .step_by(8)
+        .step_by(ASCII_BITS_PER_CHAR)
         .map(|i| {
-            let int = u8::from_str_radix(&s[i..i + 8], 2);
+            let int = u8::from_str_radix(&s[i..i + ASCII_BITS_PER_CHAR], 2);
             let i1 = int.unwrap() as u32;
             let char = from_u32(i1).unwrap();
             return char;
@@ -37,9 +48,13 @@ fn binary_string_to_ascii(mut s: String) -> String {
 }
 
 fn shift_to_ascii(bin_str: String, direction: &str, shift_cnt: i32) -> String {
+    init();
     let string = shift_binary_string(bin_str, shift_cnt, direction);
     let string1 = binary_string_to_ascii(string);
     string1
+}
+
+fn init(){
 }
 
 #[cfg(test)]
